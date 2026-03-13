@@ -2,6 +2,7 @@
 
 Faiza Khelladi  
 Formation Data Scientist – Machine Learning
+Mission du projet5 : Déployez un modèle de Machine Learning
 
 ------------------------------------------------------------------
 # Prédiction de l’attrition des employés dans une ESN
