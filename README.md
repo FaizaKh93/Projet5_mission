@@ -201,5 +201,15 @@ Projet5_mission
 └── README.md
 ```
 
----
+------------------------------------------------------------------
+## CI/CD
 
+Ce projet utilise GitHub Actions pour :
+
+- exécuter les tests automatiquement avec pytest
+- valider chaque Pull Request
+- garantir la qualité du code avant fusion
+
+La branche main est protégée :
+- merge uniquement via Pull Request
+- validation obligatoire des tests
