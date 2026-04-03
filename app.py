@@ -47,6 +47,35 @@ def sample():
 # endpoint predict
 @app.post("/predict")
 def predict(data: InputData):
+    #======================================
+    # case 1 : empty input
+    #======================================
+    if not data.rows:
+        raise HTTPException(
+            status_code=400,
+            detail="Input data for prediction is empty."
+        )
+    
+    # length of each row  (number of columns)
+    row_lengths = [len(row) for row in data.rows]
+
+    # Number of features expected by the model
+    expected_n_features = len(reference_columns)
+
+    # Number of features received by the model
+    received_n_features = row_lengths[0]
+    #======================================
+    # case 2 : wrong number of columns
+    #======================================
+    if received_n_features != expected_n_features:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Wrong number of features. "
+                f"Expected {expected_n_features}, got {received_n_features}."
+            )
+        )
+    #======================================
     # transformer en DataFrame
     X = pd.DataFrame(data.rows, columns=reference_columns)
 
