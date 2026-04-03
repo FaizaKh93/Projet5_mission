@@ -1,6 +1,6 @@
 import joblib
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel # définir et valider la structure des données entrantes
 
 # Initialisation de l'app
