@@ -19,17 +19,6 @@ class InputData(BaseModel):
 #===============================================================
 # endpoints 
 #===============================================================
-# endpoint predict
-@app.post("/predict")
-def predict(data: InputData):
-    # transformer en DataFrame
-    X = pd.DataFrame(data.rows, columns=reference_columns)
-
-    # prédictions
-    preds = model.predict(X)
-
-    return {"predictions": preds.tolist()}
-#===============================================================
 # endpoint fast test
 @app.get("/")
 def root():
@@ -54,3 +43,15 @@ def get_columns():
 def sample():
     X_sample = pd.read_csv(DATA_PATH, nrows=2)
     return {"rows": X_sample.values.tolist()}
+#===============================================================
+# endpoint predict
+@app.post("/predict")
+def predict(data: InputData):
+    # transformer en DataFrame
+    X = pd.DataFrame(data.rows, columns=reference_columns)
+
+    # prédictions
+    preds = model.predict(X)
+
+    return {"predictions": preds.tolist()}
+
