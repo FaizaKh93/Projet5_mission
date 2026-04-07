@@ -24,9 +24,10 @@ reference_columns = pd.read_csv(DATA_PATH, nrows=0).columns.tolist()
 
 class InputData(BaseModel):
     rows: list[list[float]]
-
+#===============================================================
 #===============================================================
 # endpoints 
+#===============================================================
 #===============================================================
 # endpoint fast test
 @app.get("/")
@@ -34,6 +35,7 @@ def root():
     return {"message": "API OK"}
 #===============================================================
 # endpoint health : status, loaded model, number of features
+#===============================================================
 @app.get("/health")
 def health():
     return {
@@ -41,19 +43,25 @@ def health():
         "model_loaded": model is not None,
         "n_features": len(reference_columns)
     }
+
 #===============================================================
 # endpoint columns : name of expected columns
+#===============================================================
 @app.get("/columns")
 def get_columns():
     return {"columns": reference_columns}
+
 #===============================================================
 # endpoint columns : get data to feed /predict
+#===============================================================
 @app.get("/sample")
 def sample():
     X_sample = pd.read_csv(DATA_PATH, nrows=5)
     return {"rows": X_sample.values.tolist()}
+
 #===============================================================
 # endpoint predict
+#===============================================================
 @app.post("/predict")
 def predict(data: InputData, db: Session = Depends(get_db)):
     #======================================
@@ -91,8 +99,9 @@ def predict(data: InputData, db: Session = Depends(get_db)):
     # prédictions
     preds = model.predict(X)
 
-    for pred in preds:
+    for row, pred in zip(data.rows, preds):
         db_record = Prediction(
+            input_data=row,
             n_features=len(reference_columns),
             prediction=float(pred)
         )
