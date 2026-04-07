@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, DateTime
+from sqlalchemy import Column, Integer, Float, DateTime, JSON
 from sqlalchemy.sql import func
 
 from database.db_config import Base, engine
@@ -9,6 +9,9 @@ class Prediction(Base):
     __tablename__ = "predictions"
 
     id = Column(Integer, primary_key=True, index=True)
+
+    # données d'entrée envoyées au modèle (une ligne / un employé)
+    input_data = Column(JSON)
 
     # nombre de features (utile pour debug)
     n_features = Column(Integer)
