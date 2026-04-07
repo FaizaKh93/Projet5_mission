@@ -1,7 +1,16 @@
 import joblib
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel # définir et valider la structure des données entrantes
+
+from sqlalchemy.orm import Session
+
+from database.db_config import get_db
+from database.create_db import Prediction
+
+#===============================================================
+#===============================================================
+#===============================================================
 
 # Initialisation de l'app
 app = FastAPI()
@@ -41,12 +50,12 @@ def get_columns():
 # endpoint columns : get data to feed /predict
 @app.get("/sample")
 def sample():
-    X_sample = pd.read_csv(DATA_PATH, nrows=2)
+    X_sample = pd.read_csv(DATA_PATH, nrows=5)
     return {"rows": X_sample.values.tolist()}
 #===============================================================
 # endpoint predict
 @app.post("/predict")
-def predict(data: InputData):
+def predict(data: InputData, db: Session = Depends(get_db)):
     #======================================
     # case 1 : empty input
     #======================================
@@ -81,6 +90,15 @@ def predict(data: InputData):
 
     # prédictions
     preds = model.predict(X)
+
+    for pred in preds:
+        db_record = Prediction(
+            n_features=len(reference_columns),
+            prediction=float(pred)
+        )
+        db.add(db_record)
+
+    db.commit()
 
     return {"predictions": preds.tolist()}
 
