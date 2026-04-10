@@ -16,5 +16,5 @@ jobs:
       - name: Sync repository to Hugging Face Space
         uses: huggingface/hub-sync@main
         with: 
-          repo: Faiza93/ml-prediction-api
-          token: ${{ secrets.HF_TOKEN }} # utiliser le token Hugging Face stocké dans GitHub Secrets 
+          huggingface_repo_id: Faiza93/ml-prediction-api
+          fh_token: ${{ secrets.HF_TOKEN }} # utiliser le token Hugging Face stocké dans GitHub Secrets 
