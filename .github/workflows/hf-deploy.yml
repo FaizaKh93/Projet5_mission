@@ -1,0 +1,20 @@
+name: Deploy to Hugging Face Hub
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  huggingface-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository # récupérer le contenu du dépôt
+        uses: actions/checkout@v4
+
+      - name: Sync repository to Hugging Face Space
+        uses: huggingface/hub-sync@v0.0.5
+        with: 
+          repo: Faiza93/ml-prediction-api
+          token: ${{ secrets.HF_TOKEN }} # utiliser le token Hugging Face stocké dans GitHub Secrets 
