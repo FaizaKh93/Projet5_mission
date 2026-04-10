@@ -1,4 +1,5 @@
 import joblib
+
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel # définir et valider la structure des données entrantes
@@ -81,8 +82,19 @@ def predict(data: InputData, db: Session = Depends(get_db)):
 
     # Number of features received by the model
     received_n_features = row_lengths[0]
+
     #======================================
-    # case 2 : wrong number of columns
+    # case 2 : check if rows have the same length
+    #======================================
+    # Vérifie que toutes les lignes ont la même longueur
+    if len(set(row_lengths)) > 1:
+        raise HTTPException(
+            status_code=400,
+            detail="All rows must have the same number of values."
+        )
+
+    #======================================
+    # case 3 : wrong number of columns
     #======================================
     if received_n_features != expected_n_features:
         raise HTTPException(
@@ -92,6 +104,17 @@ def predict(data: InputData, db: Session = Depends(get_db)):
                 f"Expected {expected_n_features}, got {received_n_features}."
             )
         )
+    
+    # ================================ 
+    # case 4 : null / NaN values
+    # ================================
+    for row in data.rows:
+        for value in row:
+            if pd.isna(value):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid input: NaN or null values are not allowed."
+                )
     #======================================
     # transformer en DataFrame
     X = pd.DataFrame(data.rows, columns=reference_columns)
@@ -109,5 +132,5 @@ def predict(data: InputData, db: Session = Depends(get_db)):
 
     db.commit()
 
-    return {"predictions": preds.tolist()}
+    return {"predictions": preds.tolist()} 
 
