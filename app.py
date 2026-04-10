@@ -16,7 +16,7 @@ from database.create_db import Prediction
 # Initialisation de l'app
 app = FastAPI()
 
-# Création automatique des tables au démarrage de l'application (test distant) 
+# Création automatique des tables au démarrage de l'application (test distant)  
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
