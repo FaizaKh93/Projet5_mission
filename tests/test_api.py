@@ -4,8 +4,8 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 
 # importer l'application FastAPI
-from app import app
-from db_config import get_db
+from app import app, get_db
+#from db_config import get_db
 
 
 # créer un client de test basé sur l’application
