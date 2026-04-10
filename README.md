@@ -1,3 +1,13 @@
+---
+title: ML Prediction API with FastAPI and Automated Testing
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Auteur
 
 Faiza Khelladi  

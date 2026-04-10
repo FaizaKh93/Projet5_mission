@@ -6,7 +6,7 @@ from pydantic import BaseModel # définir et valider la structure des données e
 
 from sqlalchemy.orm import Session
 
-from database.db_config import get_db
+from database.db_config import get_db, Base, engine
 from database.create_db import Prediction
 
 #===============================================================
@@ -16,9 +16,14 @@ from database.create_db import Prediction
 # Initialisation de l'app
 app = FastAPI()
 
+# Création automatique des tables au démarrage de l'application (test distant) 
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+
 # Charger le modèle et les données
 MODEL_PATH = "models/trained_model.pkl"
-DATA_PATH = "data/processed/X_encoded.csv"
+DATA_PATH = "data/processed/X_encoded.csv" 
 
 model = joblib.load(MODEL_PATH) 
 reference_columns = pd.read_csv(DATA_PATH, nrows=0).columns.tolist()

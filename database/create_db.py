@@ -23,7 +23,7 @@ class Prediction(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# créer les tables dans la base
+# créer les tables dans la base (test local)
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine) # créer physiquement la table dans PostgreSQL
     print("Tables created successfully")
