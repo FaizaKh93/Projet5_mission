@@ -1,9 +1,12 @@
 import numpy as np
 # Permet de simuler des requêtes HTTP (GET, POST) vers l’API sans lancer un serveur réel
 from fastapi.testclient import TestClient
+from unittest.mock import MagicMock
 
 # importer l'application FastAPI
 from app import app
+from db_config import get_db
+
 
 # créer un client de test basé sur l’application
 client = TestClient(app)
@@ -87,9 +90,52 @@ def test_sample():
 
 
 # ================================
-# Test de prédiction avec input valide
+# Test de prédiction avec input valide -- fake DB
 # ================================
 def test_predict_valid_input():
+
+    # créer une fausse db
+    fake_db = MagicMock()
+    
+    # remplacer temporairement get_db
+    def override_get_db():
+        yield fake_db
+
+    # instruction à FastAPI afin d’utiliser la fausse base dans ce test
+    app.dependency_overrides[get_db] = override_get_db
+
+    try:
+        sample_response = client.get("/sample")
+        sample_data = sample_response.json()
+
+        payload = {
+            "rows": sample_data["rows"][:2]
+        }
+
+        response = client.post("/predict", json=payload)
+        
+        # Vérifier que la requête fonctionne
+        assert response.status_code == 200
+
+        response_json = response.json()
+
+        # Vérifier que les prédictions sont présentes
+        assert "predictions" in response_json
+        assert len(response_json["predictions"]) == 2
+        
+        # vérifier que le code a bien tenté d’ajouter en base
+        assert fake_db.add.called
+
+        # vérifier que le code a bien tenté de sauvegarder
+        assert fake_db.commit.called
+
+    finally:
+        app.dependency_overrides.clear()
+
+# ================================
+# Test de prédiction avec input valide -- real DB
+# ================================
+""" def test_predict_valid_input(): 
     # récupèrer un exemple valide via l’API
     sample_response = client.get("/sample")
     sample_data = sample_response.json()
@@ -114,7 +160,7 @@ def test_predict_valid_input():
     assert isinstance(data["predictions"], list)
 
     # Vérifier que le nombre de prédictions correspond au nombre d’inputs
-    assert len(data["predictions"]) == len(payload["rows"])
+    assert len(data["predictions"]) == len(payload["rows"]) """
 
 
 # ================================
