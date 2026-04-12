@@ -14,3 +14,7 @@ nav:
   # "Accueil" = nom affiché dans le menu
   # "index.md" = fichier dans le dossier docs/
   - Accueil: index.md
+  - API: api.md
+  - Architecture: architecture.md
+  - Base de données: database.md
+  - Déploiement: deployment.md 
