@@ -290,3 +290,23 @@ Le déploiement est réalisé sur Hugging Face Spaces, facilitant l’hébergeme
 ### 11.5 GitHub Actions (CI/CD)
 GitHub Actions automatise les tests, la validation du code et le déploiement.  
 Il permet de synchroniser automatiquement le dépôt avec Hugging Face à chaque mise à jour.
+
+------------------------------------------------------------------
+## 12. Documentation technique
+
+Une documentation technique du code est générée avec Sphinx à partir des docstrings Python.
+
+Elle permet de documenter automatiquement les modules, fonctions et classes du projet.
+
+------------------------------------------------------------------
+## 13. Documentation utilisateur (MkDocs)
+
+Une documentation web est générée avec MkDocs à partir de fichiers Markdown.
+
+Elle permet de présenter :
+- l’API
+- l’architecture du projet
+- le déploiement
+- la base de données
+
+Cette documentation est structurée en plusieurs pages pour faciliter la navigation. 
