@@ -1,0 +1,20 @@
+site_name: ML Prediction API Documentation
+
+site_description: Documentation du projet de prédiction de l’attrition des employés
+
+site_author: Faiza Khelladi
+
+# Configuration du thème visuel du site
+theme:
+  # Nom du thème (ici "material" installé avec mkdocs-material)
+  name: material
+ 
+# Navigation du site (menu principal)
+nav:
+  # "Accueil" = nom affiché dans le menu
+  # "index.md" = fichier dans le dossier docs/
+  - Accueil: index.md
+  - API: api.md
+  - Architecture: architecture.md
+  - Base de données: database.md
+  - Déploiement: deployment.md 
