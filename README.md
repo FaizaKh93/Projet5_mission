@@ -15,11 +15,11 @@ Formation Data Scientist – Machine Learning
 Mission du projet5 : Déployez un modèle de Machine Learning
 
 ------------------------------------------------------------------
-# Prédiction de l’attrition des employés dans une ESN
+# ML Prediction API – Employee Attrition Prediction
 
-## Description du projet
+## 1. Objectif du projet
 
-Ce projet a pour objectif d’identifier les causes du départ des employés (attrition) au sein d’une entreprise de services numériques (ESN) et de développer un modèle de ML permettant de prédire les risques de démission.
+Ce projet vise à prédire le risque de départ (attrition) des employés dans une ESN à l’aide d’un modèle de Machine Learning exposé via une API FastAPI.
 
 L’objectif est d’aider les équipes RH à :
 
@@ -29,187 +29,264 @@ L’objectif est d’aider les équipes RH à :
 
 ------------------------------------------------------------------
 
-# Contexte
+## 2. Contexte
 
-L’entreprise fait face à un taux de démission élevé, ce qui entraîne :
-
-- une perte de talents
-- des coûts de recrutement importants
-- une perte de connaissances internes
-
-Une analyse des données RH a été réalisée afin :
-
-1. d’identifier les causes des départs
-2. de construire un modèle de prédiction du risque de départ des employés
+L’entreprise souhaite anticiper les départs des employés à l’aide d’un modèle de Machine Learning.
 
 ------------------------------------------------------------------
 
-# Données utilisées
+## 3. Données
 
-Trois sources de données ont été utilisées :
-
-## Données SIRH
-
-Informations sur les employés :
-
-- ancienneté dans l’entreprise
-- revenu mensuel
-- département
-- poste
-- âge
-- etc.
-
-## Évaluations annuelles
-
-Informations sur les performances et la satisfaction :
-
-- note d’évaluation précédente
-- satisfaction dans l’équipe
-- satisfaction dans l’environnement de travail
-- etc.
-
-## Sondage des employés
-
-Informations issues des enquêtes internes :
-
-- fréquence des déplacements
-- participation aux plans d’épargne entreprise
-- heures supplémentaires
-- domaine d’étude
-- etc.
-
-Les datasets ont été fusionnés pour créer une base de données unique de **1470 employés**.
+Les données proviennent de sources RH (SIRH, évaluations, sondages) et ont été prétraitées en amont (nettoyage, feature engineering, encodage) dans le projet 4 afin de produire un dataset CSV directement exploitable par le modèle ; l’API consomme uniquement ces données déjà prétraitées.
 
 ------------------------------------------------------------------
 
-# Analyse exploratoire des données
+## 4. Modélisation
 
-Une analyse descriptive a été réalisée afin d'étudier :
+Le modèle utilisé est un **XGBoost** sélectionné pour ses performances.
 
-- la distribution des variables numériques
-- la répartition des variables catégorielles
-- les relations entre variables et départs d’employés
+### 4.1 Performance du modèle 
 
-------------------------------------------------------------------
-# Préparation des données
-
-Plusieurs étapes de **feature engineering** ont été réalisées.
-
-Exemples de variables créées :
-
-- variation de la note d’évaluation
-- moyenne des scores de satisfaction
-- vote de satisfaction
-- ratio satisfaction / ancienneté
-- risque de burnout
-- ratio salaire / salaire moyen par poste
-- ratio salaire / salaire moyen par département
-- mobilité interne
-- ratio de stagnation
-
-Ces variables permettent de capturer des signaux liés au départ des employés.
+- Modèle : XGBoost
+- Score F2 : 0.613
+- Seuil optimal : 0.711
 
 ------------------------------------------------------------------
 
-# Encodage des données
-
-Les variables catégorielles ont été transformées avec :
-
-- OneHotEncoder
-- mapping pour certaines variables ordinales
-
-Variable cible :
-
-a_quitte_l_entreprise
-
-0 = employé reste  
-1 = employé quitte l’entreprise
-
-------------------------------------------------------------------
-
-# Modélisation
-
-Plusieurs modèles supervisés ont été testés :
-
--------------------------------------
-## Dummy Classifier
-
-Modèle de référence pour comparer les performances.
-
--------------------------------------
-## Régression Logistique
-
-Amélioration des performances mais présence de faux négatifs.
-
--------------------------------------
-## XGBoost
-
-Le modèle XGBoost a donné les meilleures performances.
-
-Optimisations réalisées :
-
-- équilibrage des classes
-- stratification des données
-- optimisation du seuil
-
-Seuil optimal : **0.711**
-
-Score F2 : **0.613**
-
-------------------------------------------------------------------
-
-# Interprétation du modèle
-
-## Importance globale des variables
-
-Variables dominantes :
-
-- ancienneté dans l’entreprise
-- salaire moyen par poste
-- salaire moyen par département
-- participation au plan d’épargne entreprise
-
-## Interprétation locale avec SHAP
-
-Les analyses montrent que :
-
-- les heures supplémentaires augmentent le risque de démission
-- une faible satisfaction des employés favorise le départ
-- un salaire relativement moins compétitif augmente la probabilité de quitter l’entreprise
-
-------------------------------------------------------------------
-# Résultats
-
-Le modèle permet :
-
-- d’anticiper les départs
-- d’identifier les facteurs d’attrition
-- d’aider les équipes RH à mettre en place des actions de rétention
-
-------------------------------------------------------------------
-
-# Perspectives
-
-Améliorations possibles :
-
-- intégrer de nouvelles données RH
-- améliorer la précision du modèle
-- déployer une API d’aide à la décision pour les équipes RH
-
-------------------------------------------------------------------
-
-# Structure du projet
+## 5. Structure du projet
 
 ```
-Projet5_mission
-│
-├── data
-├── functions
-├── notebooks
-├── presentation
-├── pyproject.toml
-└── README.md
+├── app.py # API FastAPI (point d’entrée)
+├── database/ # Configuration DB + modèles SQLAlchemy
+├── models/ # Modèle ML entraîné
+├── data/ # Données prétraitées (CSV)
+├── functions/ # Fonctions métier / preprocessing
+├── tests/ # Tests unitaires et fonctionnels (Pytest)
+├── notebooks/ # Analyse exploratoire (EDA)
+├── presentation/ # Support de présentation
+├── .github/workflows/ # Pipeline CI/CD (GitHub Actions)
+├── Dockerfile # Conteneurisation
+├── pyproject.toml # Dépendances du projet
+├── README.md # Documentation principale
+└── .gitignore
 ```
+
+------------------------------------------------------------------
+## 6. Utilisation de l’API
+
+### 6.1 Accès à l’API
+
+L’API est déployée et accessible via :
+
+https://faiza93-ml-prediction-api.hf.space
+
+------------------------------------------------------------------
+### 6.2 Documentation interactive (Swagger)
+
+Vous pouvez tester les endpoints directement ici :
+
+https://faiza93-ml-prediction-api.hf.space/docs
+
+------------------------------------------------------------------
+### 6.3 Endpoint principal
+
+**POST /predict**
+
+Permet de prédire le risque de départ des employés. 
+
+------------------------------------------------------------------
+### 6.4 Exemple de requête
+
+```json
+{
+  "rows": [
+    [41, 5993, 0, 8, 0, 6, 0, 4, 0, 2, 0, 3, 0, 4, 1, 1, 0, 11, 0, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 2, 0, 0, 0.2857, 1, 6924.27]
+  ]
+}
+```
+------------------------------------------------------------------
+### 6.5 Exemple de réponse
+```json
+{
+  "predictions": [1]
+}
+```
+------------------------------------------------------------------
+### 6.6 Interprétation
+0 -> employé reste
+1 -> employé quitte l'entreprise
+
+------------------------------------------------------------------
+## 7. Déploiement et CI/CD
+
+Le projet est déployé sur **Hugging Face Spaces** avec **Docker**.
+
+### 7.1 Déploiement
+
+- API publique : [https://faiza93-ml-prediction-api.hf.space](https://faiza93-ml-prediction-api.hf.space)
+- Documentation Swagger : [https://faiza93-ml-prediction-api.hf.space/docs](https://faiza93-ml-prediction-api.hf.space/docs)
+
+Le conteneur est défini dans le fichier `Dockerfile` et lancé automatiquement par Hugging Face Spaces.
+
+------------------------------------------------------------------
+### 7.2 Pipeline CI/CD
+
+Le projet utilise **GitHub Actions** pour automatiser :
+
+- l’exécution des tests
+- la validation du code
+- le déploiement automatique vers Hugging Face Spaces
+
+Deux workflows principaux sont utilisés :
+
+- `ci.yml` : exécute les tests Pytest à chaque push / pull request
+- `hf-deploy.yml` : synchronise le dépôt vers Hugging Face lors d’un push sur `main`
+
+------------------------------------------------------------------
+### 7.3 Gestion des environnements
+
+Le projet distingue plusieurs environnements :
+
+- **Local** : développement et tests manuels
+- **CI** : exécution automatisée des tests avec mock de la base
+- **Production** : API déployée sur Hugging Face avec PostgreSQL distant
+
+------------------------------------------------------------------
+### 7.4 Gestion des secrets
+
+Les secrets ne sont pas stockés dans le code source.
+
+- `HF_TOKEN` est stocké dans les GitHub Secrets pour le déploiement
+- `DATABASE_URL` est stocké dans les Secrets du Space Hugging Face pour la connexion à PostgreSQL
+
+------------------------------------------------------------------
+## 8. Tests
+
+Le projet inclut des tests unitaires et fonctionnels réalisés avec **Pytest**.
+
+------------------------------------------------------------------
+### 8.1 Types de tests
+
+- Tests des fonctions métier
+- Tests de l’API (endpoints FastAPI)
+- Tests de performance du modèle
+- Tests de chargement du modèle
+- Tests de chargement des données
+
+Les tests permettent de valider :
+
+- le bon fonctionnement de l’API
+- la gestion des cas limites (valeurs invalides, NaN, etc.)
+- la stabilité du modèle
+
+------------------------------------------------------------------
+### 8.2 Exécution des tests
+
+```bash
+pytest tests/
+```
+------------------------------------------------------------------
+## 9. Base de données
+
+Les prédictions sont stockées dans une base **PostgreSQL** hébergée sur Render.
+
+------------------------------------------------------------------
+### 9.1 Modèle de données
+
+Une table `predictions` est utilisée pour enregistrer :
+
+- `id` : identifiant unique  
+- `input_data` : données envoyées au modèle (JSON)  
+- `prediction` : résultat de la prédiction  
+- `created_at` : date de création  
+
+---------------------------------------------------------------------
+### 9.2 Fonctionnement
+
+À chaque appel de l’endpoint `/predict` :
+
+1. les données sont envoyées au modèle  
+2. une prédiction est générée  
+3. les données et la prédiction sont enregistrées en base  
+
+------------------------------------------------------------------
+### 9.3 Vérification du fonctionnement
+
+La persistance des données a été validée en connectant un client PostgreSQL (pgAdmin) à la base distante.
+
+------------------------------------------------------------------
+## 10. Installation locale
+
+### 10.1 Prérequis
+
+- Python 3.10+
+- uv (gestionnaire de dépendances) 
+
+------------------------------------------------------------------
+### 10.2 Installation
+- cloner le dépôt
+
+```bash
+git clone https://github.com/FaizaKh93/Projet5_mission.git
+cd Projet5_mission
+```
+- Installer les dépendances 
+```bash
+uv sync 
+```
+------------------------------------------------------------------
+### 10.3 Lancer l'API
+```bash
+uv run uvicorn app:app --reload
+```
+
+------------------------------------------------------------------
+### 10.4 Accès local
+API : http://127.0.0.1:8000
+Documentation Swagger : http://127.0.0.1:8000/docs
+
+------------------------------------------------------------------
+## 11. Choix techniques
+
+### 11.1 FastAPI
+
+FastAPI a été choisi pour développer l’API car il permet de créer rapidement des endpoints performants tout en générant automatiquement une documentation interactive (Swagger).
+
+Il facilite également la validation des données en entrée grâce à Pydantic, ce qui permet de sécuriser l’API et de gérer les erreurs (types incorrects, valeurs manquantes, etc.).
+
+---
+------------------------------------------------------------------
+
+## 11. Choix techniques
+
+------------------------------------------------------------------
+
+## 11. Choix techniques
+
+### 11.1 FastAPI
+FastAPI permet de créer une API performante avec validation automatique des données (Pydantic) et documentation interactive (Swagger).  
+Il facilite le développement rapide tout en garantissant la robustesse des entrées utilisateur.
 
 ---
 
+### 11.2 XGBoost
+XGBoost est un modèle performant pour les données tabulaires, capable de capturer des relations complexes entre variables.  
+Il a été retenu car il offre les meilleures performances (score F2) sur ce problème d’attrition.
+
+---
+
+### 11.3 PostgreSQL (Render) 
+PostgreSQL est utilisé pour stocker les prédictions de manière persistante et structurée.  
+La base est hébergée sur Render, ce qui permet une gestion simple et accessible en production.
+
+---
+
+### 11.4 Docker & Hugging Face Spaces
+Docker permet de containeriser l’application pour garantir un environnement reproductible.  
+Le déploiement est réalisé sur Hugging Face Spaces, facilitant l’hébergement et l’exposition de l’API.
+
+---
+
+### 11.5 GitHub Actions (CI/CD)
+GitHub Actions automatise les tests, la validation du code et le déploiement.  
+Il permet de synchroniser automatiquement le dépôt avec Hugging Face à chaque mise à jour.
