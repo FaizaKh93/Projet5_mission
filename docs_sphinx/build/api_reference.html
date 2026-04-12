@@ -87,10 +87,29 @@
 </section>
 <section id="module-database.db_config">
 <span id="configuration-de-la-base-de-donnees"></span><h2>Configuration de la base de données<a class="headerlink" href="#module-database.db_config" title="Lien vers cette rubrique">¶</a></h2>
+<p>Configuration de la base de données.</p>
+<p>Ce module gère la connexion à la base PostgreSQL via SQLAlchemy,
+ainsi que la création des sessions utilisées dans l’application FastAPI.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="database.db_config.get_db">
 <span class="sig-prename descclassname"><span class="pre">database.db_config.</span></span><span class="sig-name descname"><span class="pre">get_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#database.db_config.get_db" title="Lien vers cette définition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Génère une session de base de données.</p>
+<p>Cette fonction est utilisée comme dépendance dans FastAPI
+pour fournir une session active à chaque requête.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Session</em> – Session SQLAlchemy permettant d’exécuter des requêtes.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Fonctionnement:</dt><dd><ul class="simple">
+<li><p>ouvre une session</p></li>
+<li><p>la fournit à l’endpoint</p></li>
+<li><p>ferme la session après utilisation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-database.create_db">

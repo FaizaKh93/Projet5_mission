@@ -1,3 +1,10 @@
+"""
+Configuration de la base de données.
+
+Ce module gère la connexion à la base PostgreSQL via SQLAlchemy,
+ainsi que la création des sessions utilisées dans l'application FastAPI.
+"""
+
 import os
 from sqlalchemy import create_engine 
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -20,8 +27,22 @@ Base = declarative_base()
 
 # créer une session de base de données
 def get_db():
+    """
+    Génère une session de base de données.
+
+    Cette fonction est utilisée comme dépendance dans FastAPI
+    pour fournir une session active à chaque requête.
+
+    Yields:
+        Session: Session SQLAlchemy permettant d'exécuter des requêtes.
+
+    Fonctionnement:
+        - ouvre une session
+        - la fournit à l'endpoint
+        - ferme la session après utilisation
+    """
     db = SessionLocal()
     try:
         yield db
     finally:
-        db.close() 
+        db.close()  
