@@ -214,6 +214,16 @@ Une table `predictions` est utilisée pour enregistrer :
 
 La persistance des données a été validée en connectant un client PostgreSQL (pgAdmin) à la base distante.
 
+### 9.4 Exemple de data stockée dans la table
+id : 1
+
+input_data : [41.0, 5993.0, 8.0, 8.0, 6.0, 4.0, 2.0, 3.0, 4.0, 1.0, 1.0, 1.0, 11.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.2857142857142857, 1.0, 6924.279141104295, 6924.279141104295, 0.8655052573522083, 1.0, 2.0, 0.5714285714285714, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+
+n_features : 53
+
+prediction : 1
+
+created_at : 2026-04-11 07:01:40.009576+00
 ------------------------------------------------------------------
 ## 10. Installation locale
 
@@ -246,21 +256,6 @@ API : http://127.0.0.1:8000
 Documentation Swagger : http://127.0.0.1:8000/docs
 
 ------------------------------------------------------------------
-## 11. Choix techniques
-
-### 11.1 FastAPI
-
-FastAPI a été choisi pour développer l’API car il permet de créer rapidement des endpoints performants tout en générant automatiquement une documentation interactive (Swagger).
-
-Il facilite également la validation des données en entrée grâce à Pydantic, ce qui permet de sécuriser l’API et de gérer les erreurs (types incorrects, valeurs manquantes, etc.).
-
----
-------------------------------------------------------------------
-
-## 11. Choix techniques
-
-------------------------------------------------------------------
-
 ## 11. Choix techniques
 
 ### 11.1 FastAPI
