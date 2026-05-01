@@ -13,7 +13,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = os.getenv("DATABASE_URL","postgresql+psycopg://postgres:fk_projet5@localhost:5432/projet5_db")
 
 # ancien : local
-#DATABASE_URL = "postgresql+psycopg://postgres:fk_projet5@localhost:5432/projet5_db"
 
 # créer une connexion à la base de données (lien entre Python et PostgreSQL)
 engine = create_engine(DATABASE_URL)
