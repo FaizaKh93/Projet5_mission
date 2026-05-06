@@ -1,7 +1,7 @@
 import joblib
-
+import os
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Header
 from pydantic import BaseModel # définir et valider la structure des données entrantes
 
 from sqlalchemy.orm import Session
@@ -16,6 +16,27 @@ from database.create_db import Prediction
 # Initialisation de l'app
 app = FastAPI()
 
+# Récupération de la clé API depuis les variables d'environnement
+API_KEY = os.getenv("API_KEY") 
+
+# Vérification si la clé API envoyée par le client est correcte
+def verify_api_key(x_api_key: str = Header(None)):
+    expected_api_key = os.getenv("API_KEY") 
+    # Si aucune clé API n'est définie côté serveur
+    # => problème de configuration (ex : oubli dans HF Spaces)
+    if not expected_api_key:
+        raise HTTPException(
+            status_code=500,  # erreur serveur
+            detail="API key is not configured"
+        )
+
+    # Si la clé envoyée dans la requête (x-api-key) est différente de celle du serveur
+    if x_api_key != expected_api_key:
+        raise HTTPException(
+            status_code=401,  # erreur d'authentification
+            detail="Invalid or missing API key"
+        )
+    
 # Création automatique des tables au démarrage de l'application (test distant)  
 @app.on_event("startup")
 def on_startup():
@@ -28,7 +49,7 @@ DATA_PATH = "data/processed/X_encoded.csv"
 model = joblib.load(MODEL_PATH) 
 reference_columns = pd.read_csv(DATA_PATH, nrows=0).columns.tolist()
 
-class InputData(BaseModel):
+class InputData(BaseModel): 
     rows: list[list[float]]
 #===============================================================
 #===============================================================
@@ -58,10 +79,10 @@ def get_columns():
     return {"columns": reference_columns}
 
 #===============================================================
-# endpoint columns : get data to feed /predict
+# endpoint sample : get data to feed /predict
 #===============================================================
 @app.get("/sample")
-def sample():
+def sample(api_key: str = Depends(verify_api_key)):
     X_sample = pd.read_csv(DATA_PATH, nrows=5)
     return {"rows": X_sample.values.tolist()}
 
@@ -69,7 +90,7 @@ def sample():
 # endpoint predict
 #===============================================================
 @app.post("/predict")
-def predict(data: InputData, db: Session = Depends(get_db)):
+def predict(data: InputData, db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
     #======================================
     # case 1 : empty input
     #======================================

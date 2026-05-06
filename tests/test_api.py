@@ -1,17 +1,19 @@
+import os
 import numpy as np
 # Permet de simuler des requêtes HTTP (GET, POST) vers l’API sans lancer un serveur réel
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 
 # importer l'application FastAPI
-from app import app, get_db
+from app import app, get_db 
 #from db_config import get_db
 
 
 # créer un client de test basé sur l’application
 client = TestClient(app)
 
-
+HEADERS = {"x-api-key": "test_key"}
+os.environ["API_KEY"] = "test_key"
 # ================================
 # Test de la route racine "/"
 # ================================
@@ -73,7 +75,12 @@ def test_columns():
 # Test de l’endpoint "/sample"
 # ================================
 def test_sample():
-    response = client.get("/sample")
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
+    response = client.get("/sample", headers=HEADERS)
 
     assert response.status_code == 200
 
@@ -93,6 +100,10 @@ def test_sample():
 # Test de prédiction avec input valide -- fake DB
 # ================================
 def test_predict_valid_input():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
 
     # créer une fausse db
     fake_db = MagicMock()
@@ -105,14 +116,14 @@ def test_predict_valid_input():
     app.dependency_overrides[get_db] = override_get_db
 
     try:
-        sample_response = client.get("/sample")
+        sample_response = client.get("/sample", headers=HEADERS)
         sample_data = sample_response.json()
 
         payload = {
             "rows": sample_data["rows"][:2]
         }
 
-        response = client.post("/predict", json=payload)
+        response = client.post("/predict", json=payload,headers=HEADERS)
         
         # Vérifier que la requête fonctionne
         assert response.status_code == 200
@@ -167,11 +178,16 @@ def test_predict_valid_input():
 # Test : input vide (erreur)
 # ================================
 def test_predict_empty_input():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
     payload = {
         "rows": []
     }
 
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict", json=payload, headers=HEADERS)
 
     # On attend une erreur 400 (Bad Request)
     assert response.status_code == 400
@@ -184,6 +200,11 @@ def test_predict_empty_input():
 # Test : lignes de tailles différentes (erreur)
 # ================================
 def test_predict_inconsistent_row_lengths():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
     payload = {
         "rows": [
             [1.0, 2.0, 3.0],
@@ -191,7 +212,7 @@ def test_predict_inconsistent_row_lengths():
         ]
     }
 
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict", json=payload, headers=HEADERS)
 
     assert response.status_code == 400
 
@@ -203,13 +224,18 @@ def test_predict_inconsistent_row_lengths():
 # Test : mauvais nombre de features (erreur)
 # ================================
 def test_predict_wrong_number_of_features():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
     payload = {
         "rows": [
             [1.0, 2.0, 3.0]  # nombre de colonnes incorrect
         ]
     }
 
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict", json=payload, headers=HEADERS)
 
     assert response.status_code == 400
 
@@ -221,6 +247,11 @@ def test_predict_wrong_number_of_features():
 # Test : mauvais types de features : string, booleéen, dict., NaN
 # ================================
 def test_predict_invalid_types():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
     invalid_payloads = [
         {"rows": [["a", "b", "c"]]}, 
         {"rows": [[1.0, "a", 3.0]]},
@@ -231,15 +262,20 @@ def test_predict_invalid_types():
     ]
 
     for payload in invalid_payloads:
-        response = client.post("/predict", json=payload)
+        response = client.post("/predict", json=payload, headers=HEADERS)
         assert response.status_code == 422
 
 def test_predict_null_values():
+    # simuler la variable d’environnement
+    import os
+    os.environ["API_KEY"] = "test_key"
+    #headers = {"x-api-key": "test_key"}
+
     payload = {
         "rows": [
             [1.0, None, 3.0]
         ]
     }
 
-    response = client.post("/predict", json=payload)
+    response = client.post("/predict", json=payload, headers=HEADERS)
     assert response.status_code in [400, 422]

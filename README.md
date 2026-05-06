@@ -117,6 +117,22 @@ Permet de prédire le risque de départ des employés.
 1 -> employé quitte l'entreprise
 
 ------------------------------------------------------------------
+### 6.7 Authentification et gestion des accès 
+L’API implémente un mécanisme simple d’authentification basé sur une **clé API** afin de sécuriser les endpoints sensibles.
+
+#### 6.7.1 Principe
+ 
+Les endpoints suivants sont protégés :
+- `/predict`
+- `/sample`
+
+Pour y accéder, il est nécessaire de fournir une clé API dans le header HTTP :
+
+```http
+x-api-key: votre_cle_api
+```
+
+------------------------------------------------------------------
 ## 7. Déploiement et CI/CD
 
 Le projet est déployé sur **Hugging Face Spaces** avec **Docker**.
