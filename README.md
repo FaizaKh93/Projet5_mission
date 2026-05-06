@@ -131,7 +131,11 @@ Pour y accéder, il est nécessaire de fournir une clé API dans le header HTTP 
 ```http
 x-api-key: votre_cle_api
 ```
+La clé n’est pas fournie pour des raisons de sécurité.
 
+Pour tester l’API, vous pouvez :
+- contacter l’auteur afin d’obtenir une clé valide
+- ou configurer votre propre variable d’environnement `API_KEY` dans les paramètres de Hugging Face Spaces.
 ------------------------------------------------------------------
 ## 7. Déploiement et CI/CD
 
