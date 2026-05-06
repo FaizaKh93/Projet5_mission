@@ -17,21 +17,21 @@ from database.create_db import Prediction
 app = FastAPI()
 
 # Récupération de la clé API depuis les variables d'environnement
-API_KEY = os.getenv("API_KEY")
+API_KEY = os.getenv("API_KEY") 
 
 # Vérification si la clé API envoyée par le client est correcte
 def verify_api_key(x_api_key: str = Header(None)):
-
+    expected_api_key = os.getenv("API_KEY") 
     # Si aucune clé API n'est définie côté serveur
     # => problème de configuration (ex : oubli dans HF Spaces)
-    if not API_KEY:
+    if not expected_api_key:
         raise HTTPException(
             status_code=500,  # erreur serveur
             detail="API key is not configured"
         )
 
     # Si la clé envoyée dans la requête (x-api-key) est différente de celle du serveur
-    if x_api_key != API_KEY:
+    if x_api_key != expected_api_key:
         raise HTTPException(
             status_code=401,  # erreur d'authentification
             detail="Invalid or missing API key"
