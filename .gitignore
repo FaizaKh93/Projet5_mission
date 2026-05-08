@@ -19,3 +19,4 @@ env/
 # Fichiers temporaires
 *.tmp
 .coverage
+docs_sphinx/bluid/
