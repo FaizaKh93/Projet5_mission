@@ -1,13 +1,14 @@
 import joblib
 import os
 import pandas as pd
+
 from fastapi import FastAPI, HTTPException, Depends, Header
-from pydantic import BaseModel # définir et valider la structure des données entrantes
+from pydantic import BaseModel  # définir et valider la structure des données entrantes
 
 from sqlalchemy.orm import Session
 
 from database.db_config import get_db, Base, engine
-from database.create_db import Prediction
+from database.create_db import Prediction, InputDataDB, ModelVersion, Employee
 
 #===============================================================
 #===============================================================
@@ -45,17 +46,19 @@ def on_startup():
 # Charger le modèle et les données
 MODEL_PATH = "models/trained_model.pkl"
 DATA_PATH = "data/processed/X_encoded.csv" 
+SIRH_PATH = "data/extrait_sirh.csv"
 
 model = joblib.load(MODEL_PATH) 
 reference_columns = pd.read_csv(DATA_PATH, nrows=0).columns.tolist()
 
-class InputData(BaseModel): 
+class InputData(BaseModel):
+    employee_refs: list[int]
     rows: list[list[float]]
 #===============================================================
 #===============================================================
 # endpoints 
 #===============================================================
-#===============================================================
+#=============================================================== 
 # endpoint fast test
 @app.get("/")
 def root():
@@ -84,7 +87,10 @@ def get_columns():
 @app.get("/sample")
 def sample(api_key: str = Depends(verify_api_key)):
     X_sample = pd.read_csv(DATA_PATH, nrows=5)
-    return {"rows": X_sample.values.tolist()}
+    sirh_sample = pd.read_csv(SIRH_PATH, nrows=5)
+    return {
+        "employee_refs": sirh_sample["id_employee"].tolist(),
+        "rows": X_sample.values.tolist()}
 
 #===============================================================
 # endpoint predict
@@ -148,13 +154,93 @@ def predict(data: InputData, db: Session = Depends(get_db), api_key: str = Depen
     # prédictions
     preds = model.predict(X)
 
-    for row, pred in zip(data.rows, preds):
-        db_record = Prediction(
-            input_data=row,
-            n_features=len(reference_columns),
-            prediction=float(pred)
+    #======================================
+    # Récupérer les index des colonnes métier
+    #======================================
+    age_index = reference_columns.index("age")
+    revenu_index = reference_columns.index("revenu_mensuel")
+    #employee_index = reference_columns.index("revenu_mensuel")
+
+    #======================================
+    # Model Version
+    #======================================
+    # Vérifier si la version du modèle existe déjà en base
+    model_version = (
+        # interroger la table model_versions
+        db.query(ModelVersion)
+        .filter(
+            # rechercher le modèle nommé XGBoost
+            ModelVersion.model_name == "XGBoost",
+
+            # rechercher spécifiquement la version v1
+            ModelVersion.version == "v1"
         )
-        db.add(db_record)
+        # récupérer le premier résultat trouvé
+        .first()
+)
+    # Si aucune version n'existe encore en base
+    if model_version is None:
+        # créer un nouvel enregistrement de version
+        model_version = ModelVersion(
+            model_name="XGBoost",
+            version="v1"
+        )
+
+        # ajouter l'objet à la session SQLAlchemy
+        db.add(model_version)
+
+        # envoyer temporairement en base pour générer l'id
+        db.flush()
+ 
+    #======================================
+    # InputDataDB & Prediction
+    #======================================
+    for employee_ref, row, pred in zip(data.employee_refs, data.rows, preds):
+        #=======================================
+        # Employee
+        #=======================================
+        # Vérifier si l'employé existe déjà
+        employee = (
+            db.query(Employee)
+            .filter(Employee.employee_ref == str(employee_ref))
+            .first()
+        )
+
+        # Si l'employé n'existe pas, le créer
+        if employee is None:
+            employee = Employee(
+                employee_ref=str(employee_ref)
+            )
+
+            db.add(employee)
+            db.flush()
+        #=======================================  
+        # inputs
+        #=======================================
+        input_record = InputDataDB(
+        employee_id=employee.id,
+        input_data=row,
+        age=row[age_index],
+        revenu=row[revenu_index],
+        n_features=len(reference_columns)
+        )
+
+        db.add(input_record)
+        db.flush()
+
+        #=======================================
+        # prediction
+        #=======================================
+        prediction_record = Prediction(
+        input_id=input_record.id,
+        employee_id=employee.id,
+        # lien vers la version du modèle utilisée
+        model_version_id=model_version.id,
+        # valeur prédite
+        prediction=float(pred)
+        )
+
+        db.add(prediction_record)
 
     db.commit()
 

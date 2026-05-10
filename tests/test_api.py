@@ -94,6 +94,16 @@ def test_sample():
 
     # Vérifier qu’il y a au moins une ligne
     assert len(data["rows"]) > 0
+    
+    # Vérifier que la clé "employee_refs" existe dans le dictionnaire data
+    assert "employee_refs" in data
+
+    # Vérifier que la valeur associée à "employee_refs" est bien une liste
+    assert isinstance(data["employee_refs"], list)
+
+    # Vérifier que le nombre d'éléments dans "employee_refs"
+    # est égal au nombre d'éléments dans "rows"
+    assert len(data["employee_refs"]) == len(data["rows"])
 
 
 # ================================
@@ -120,6 +130,7 @@ def test_predict_valid_input():
         sample_data = sample_response.json()
 
         payload = {
+            "employee_refs": sample_data["employee_refs"][:2],
             "rows": sample_data["rows"][:2]
         }
 
@@ -184,8 +195,9 @@ def test_predict_empty_input():
     #headers = {"x-api-key": "test_key"}
 
     payload = {
+        "employee_refs": [],
         "rows": []
-    }
+    } 
 
     response = client.post("/predict", json=payload, headers=HEADERS)
 
@@ -206,11 +218,12 @@ def test_predict_inconsistent_row_lengths():
     #headers = {"x-api-key": "test_key"}
 
     payload = {
-        "rows": [
-            [1.0, 2.0, 3.0],
-            [1.0, 2.0]  # ligne plus courte → erreur attendue
-        ]
-    }
+    "employee_refs": [1, 2],
+    "rows": [
+        [1.0, 2.0, 3.0],
+        [1.0, 2.0]
+    ]
+}
 
     response = client.post("/predict", json=payload, headers=HEADERS)
 
@@ -230,10 +243,11 @@ def test_predict_wrong_number_of_features():
     #headers = {"x-api-key": "test_key"}
 
     payload = {
+        "employee_refs": [1],
         "rows": [
-            [1.0, 2.0, 3.0]  # nombre de colonnes incorrect
+            [1.0, 2.0, 3.0]
         ]
-    }
+    }   
 
     response = client.post("/predict", json=payload, headers=HEADERS)
 
@@ -253,12 +267,9 @@ def test_predict_invalid_types():
     #headers = {"x-api-key": "test_key"}
 
     invalid_payloads = [
-        {"rows": [["a", "b", "c"]]}, 
-        {"rows": [[1.0, "a", 3.0]]},
-        #{"rows": [[True, False, True]]},
-        {"rows": [[{"a": 1}, {"b": 2}]]},
-        #{"rows": [[1.0, None, 3.0]]}, 
-        #{"rows": [[1.0, np.nan, 3.0]]},      
+        {"employee_refs": [1], "rows": [["a", "b", "c"]]}, 
+        {"employee_refs": [1], "rows": [[1.0, "a", 3.0]]},
+        {"employee_refs": [1], "rows": [[{"a": 1}, {"b": 2}]]},
     ]
 
     for payload in invalid_payloads:
@@ -272,10 +283,10 @@ def test_predict_null_values():
     #headers = {"x-api-key": "test_key"}
 
     payload = {
+        "employee_refs": [1],
         "rows": [
             [1.0, None, 3.0]
         ]
     }
-
     response = client.post("/predict", json=payload, headers=HEADERS)
     assert response.status_code in [400, 422]
