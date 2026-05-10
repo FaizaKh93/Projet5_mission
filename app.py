@@ -1,12 +1,12 @@
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel # définir et valider la structure des données entrantes
+from pydantic import BaseModel  # définir et valider la structure des données entrantes
 
 from sqlalchemy.orm import Session
 
 from database.db_config import get_db
-from database.create_db import Prediction
+from database.create_db import Prediction, InputDataDB, ModelVersion
 
 #===============================================================
 #===============================================================
@@ -99,13 +99,58 @@ def predict(data: InputData, db: Session = Depends(get_db)):
     # prédictions
     preds = model.predict(X)
 
-    for row, pred in zip(data.rows, preds):
-        db_record = Prediction(
-            input_data=row,
-            n_features=len(reference_columns),
-            prediction=float(pred)
+    #======================================
+    # Model Version
+    #======================================
+    # Vérifier si la version du modèle existe déjà en base
+    model_version = (
+        # interroger la table model_versions
+        db.query(ModelVersion)
+        .filter(
+            # rechercher le modèle nommé XGBoost
+            ModelVersion.model_name == "XGBoost",
+
+            # rechercher spécifiquement la version v1
+            ModelVersion.version == "v1"
         )
-        db.add(db_record)
+        # récupérer le premier résultat trouvé
+        .first()
+)
+    # Si aucune version n'existe encore en base
+    if model_version is None:
+        # créer un nouvel enregistrement de version
+        model_version = ModelVersion(
+            model_name="XGBoost",
+            version="v1"
+        )
+
+        # ajouter l'objet à la session SQLAlchemy
+        db.add(model_version)
+
+        # envoyer temporairement en base pour générer l'id
+        db.flush()
+
+    #======================================
+    # InputDataDB & Prediction
+    #======================================
+    for row, pred in zip(data.rows, preds):
+        input_record = InputDataDB(
+        input_data=row,
+        n_features=len(reference_columns)
+        )
+
+        db.add(input_record)
+        db.flush()
+
+        prediction_record = Prediction(
+        input_id=input_record.id,
+        # lien vers la version du modèle utilisée
+        model_version_id=model_version.id,
+        # valeur prédite
+        prediction=float(pred)
+        )
+
+        db.add(prediction_record)
 
     db.commit()
 

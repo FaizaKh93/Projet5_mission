@@ -1,8 +1,11 @@
+import os
 from sqlalchemy import create_engine 
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # adapte le mot de passe si besoin
-DATABASE_URL = "postgresql+psycopg://postgres:fk_projet5@localhost:5432/projet5_db"
+DATABASE_URL = "postgresql+psycopg://projet5_db_user:VVKtuvHOTPvi0l6VPdjjPpqNaeovwU6b@dpg-d7ceah5ckfvc73ca7h60-a.ohio-postgres.render.com/projet5_db"
+#DATABASE_URL = os.getenv("DATABASE_URL")
+#DATABASE_URL = "postgresql+psycopg://postgres:fk_projet5@localhost:5432/projet5_db"
 
 # créer une connexion à la base de données (lien entre Python et PostgreSQL)
 engine = create_engine(DATABASE_URL)
