@@ -59,8 +59,8 @@ class InputDataDB(Base):
     input_data = Column(JSON, nullable=False)  
 
     # quelques inputs à analyser 
-    age = Column(Float, nullable=True)
-    revenue = Column(Float, nullable=True)
+    age = Column(Float, nullable=True) 
+    revenu = Column(Float, nullable=True)
 
     # nombre de variables 
     n_features = Column(Integer, nullable=False)  
@@ -85,8 +85,11 @@ class Prediction(Base):
     id = Column(Integer, primary_key=True, index=True)
 
      # lien vers les données utilisées pour la prédiction
-    input_id = Column(Integer, ForeignKey("inputs.id"), nullable=False)  
+    input_id = Column(Integer, ForeignKey("inputs.id"), nullable=False) 
 
+    # lien vers l'id de l'employer 
+    employee_id = Column(Integer, ForeignKey("employees.id")) 
+ 
     # lien vers la version du modèle
     model_version_id = Column(Integer, ForeignKey("model_versions.id"), nullable=True)  
 
@@ -108,5 +111,4 @@ class Prediction(Base):
 # =========================
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine) # créer physiquement la table dans PostgreSQL
-    # crée physiquement les tables dans PostgreSQL
     print("Tables created successfully")
