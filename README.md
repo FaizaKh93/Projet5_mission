@@ -213,37 +213,158 @@ Les prédictions sont stockées dans une base **PostgreSQL** hébergée sur Rend
 ------------------------------------------------------------------
 ### 9.1 Modèle de données
 
-Une table `predictions` est utilisée pour enregistrer :
+La base repose sur quatre tables principales :
 
-- `id` : identifiant unique  
-- `input_data` : données envoyées au modèle (JSON)  
-- `prediction` : résultat de la prédiction  
-- `created_at` : date de création  
+#### Table `employees`
+
+Contient les informations de référence des employés.
+
+Champs principaux :
+
+- `id` : identifiant interne
+- `employee_ref` : identifiant employé provenant du SIRH
+
+---
+
+#### Table `inputs`
+
+Stocke les données envoyées au modèle avant prédiction.
+
+Champs principaux :
+
+- `id` : identifiant unique
+- `employee_id` : référence vers l’employé
+- `input_data` : données d’entrée au format JSON
+- `age` : âge de l’employé
+- `revenu` : revenu de l’employé
+- `n_features` : nombre de variables utilisées
+- `created_at` : date d’enregistrement
+
+---
+
+#### Table `predictions`
+
+Contient les résultats des prédictions réalisées par le modèle.
+
+Champs principaux :
+
+- `id` : identifiant unique
+- `input_id` : référence vers les données d’entrée
+- `employee_id` : référence vers l’employé
+- `model_version_id` : version du modèle utilisée
+- `prediction` : résultat de la prédiction
+- `created_at` : date de création
+
+---
+
+#### Table `model_versions`
+
+Permet de tracer les versions du modèle déployé.
+
+Champs principaux :
+
+- `id` : identifiant unique
+- `model_name` : nom du modèle
+- `version` : version du modèle
+- `created_at` : date de création
+
+---
+
+#### Relations entre les tables
+
+- Un employé peut avoir plusieurs entrées (`employees` → `inputs`)
+- Une entrée peut générer plusieurs prédictions (`inputs` → `predictions`)
+- Chaque prédiction est associée à une version du modèle (`model_versions` → `predictions`)
+- Chaque prédiction est liée à un employé pour assurer la traçabilité 
 
 ---------------------------------------------------------------------
 ### 9.2 Fonctionnement
-
 À chaque appel de l’endpoint `/predict` :
 
-1. les données sont envoyées au modèle  
-2. une prédiction est générée  
-3. les données et la prédiction sont enregistrées en base  
+1. les données d’entrée sont envoyées à l’API,
+2. le modèle génère une prédiction,
+3. les données sont enregistrées dans la table `inputs`,
+4. l’employé associé est relié via `employee_id`,
+5. la prédiction est enregistrée dans la table `predictions`,
+6. la version du modèle utilisée est tracée via `model_versions`.
+
+Ce mécanisme permet d’assurer une traçabilité complète des prédictions réalisées par le modèle.
 
 ------------------------------------------------------------------
 ### 9.3 Vérification du fonctionnement
 
-La persistance des données a été validée en connectant un client PostgreSQL (pgAdmin) à la base distante.
+La persistance des données a été validée en connectant des clients PostgreSQL
+(pgAdmin et DBeaver) à la base distante hébergée sur Render.
+
+Les vérifications suivantes ont été réalisées :
+
+- création automatique des tables,
+- insertion des données d’entrée,
+- insertion des prédictions,
+- suivi des employés associés aux prédictions,
+- traçabilité de la version du modèle utilisée.
 
 ### 9.4 Exemple de data stockée dans la table
-id : 1
+#### Table `employees` 
 
-input_data : [41.0, 5993.0, 8.0, 8.0, 6.0, 4.0, 2.0, 3.0, 4.0, 1.0, 1.0, 1.0, 11.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.2857142857142857, 1.0, 6924.279141104295, 6924.279141104295, 0.8655052573522083, 1.0, 2.0, 0.5714285714285714, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| id | employee_ref |
+|----|--------------|
+| 1  | 1            |
 
-n_features : 53
+---
 
-prediction : 1
+#### Table `inputs`
 
-created_at : 2026-04-11 07:01:40.009576+00
+| Champ       | Valeur |
+|-------------|--------|
+| id          | 16     |
+| employee_id | 1      |
+| age         | 41     |
+| revenu      | 5993   |
+| n_features  | 53     |
+
+---
+
+#### Table `predictions`
+
+| Champ            | Valeur                        |
+|------------------|-------------------------------|
+| id               | 1                             |
+| input_id         | 16                            |
+| employee_id      | 1                             |
+| model_version_id | 1                             |
+| prediction       | 1                             |
+| created_at       | 2026-04-11 07:01:40.009576+00 |
+
+---
+
+#### Table `model_versions`
+
+| Champ      | Valeur  |
+|------------|---------|
+| id         | 1       |
+| model_name | XGBoost |
+| version    | v1      |
+
+------------------------------------------------------------------
+### 9.5 Modélisation UML de la base
+
+Le schéma UML de la base de données a été généré à partir des tables PostgreSQL
+à l’aide de l’outil **DBeaver** connecté à la base distante hébergée sur Render.
+
+DBeaver a permis :
+
+- de visualiser automatiquement les relations entre les tables,
+- de vérifier la cohérence du modèle relationnel,
+- et d’exporter le diagramme UML pour la documentation du projet.
+
+Le diagramme représente les relations entre :
+
+- `employees`
+- `inputs`
+- `predictions`
+- `model_versions`
+
 ------------------------------------------------------------------
 ## 10. Installation locale
 
